@@ -46,6 +46,38 @@ class TowerAppScript(Script):
         password_argument.required_on_create = True
         scheme.add_argument(password_argument)
 
+        streaming_request_argument = Argument('streaming_request')
+        streaming_request_argument.title = 'Streaming Request'
+        streaming_request_argument.data_type = Argument.data_type_boolean
+        streaming_request_argument.description = 'Whether or not this is a HTTP streaming request : true | false'
+        streaming_request_argument.required_on_create = False
+        streaming_request_argument.required_on_edit = False
+        scheme.add_argument(streaming_request_argument)
+
+        request_timeout_argument = Argument('request_timeout')
+        request_timeout_argument.title = 'Request Timeout'
+        request_timeout_argument.data_type = Argument.data_type_number
+        request_timeout_argument.description = 'Request Timeout in seconds'
+        request_timeout_argument.required_on_edit = False
+        request_timeout_argument.required_on_create False
+        scheme.add_argument(request_timeout_argument)
+
+        backoff_time_argument = Argument('backoff_time')
+        backoff_time_argument.title = 'Backoff Time'
+        backoff_time_argument.data_type = Argument.data_type_number
+        backoff_time_argument.description = 'Time in seconds to wait for retry after error or timeout'
+        backoff_time_argument.required_on_edit = False
+        backoff_time_argument.required_on_create = False
+        scheme.add_argument(backoff_time_argument)
+
+        polling_interval_argument = Argument('polling_interval')
+        polling_interval_argument.title = 'Polling Interval'
+        polling_interval_argument.data_type = Argument.data_type_number
+        polling_interval_argument.description = 'Interval time in seconds to poll the endpoint'
+        polling_interval_argument.required_on_edit = False
+        polling_interval_argument.required_on_create False
+        scheme.add_argument(polling_interval_argument)
+
         return scheme
 
     def validate_input(self, validation_definition):
@@ -53,6 +85,10 @@ class TowerAppScript(Script):
         verify_ssl = False#validation_definition.parameters['verify_ssl']
         username = validation_definition.parameters['username']
         password = validation_definition.parameters['password']
+        streaming_request = validation_definition.parameters['streaming_request']
+        request_timeout = validation_definition.parameters['request_timeout']
+        backoff_time = validation_definition.parameters['backoff_time']
+        polling_interval = validation_definition.parameters['polling_interval']
         api_config_url = urlparse.urlunsplit(['https', tower_host, '/api/v1/config/', '', ''])
         response = requests.get(api_config_url, auth=(username, password), verify=bool(verify_ssl))
         response.raise_for_status()
