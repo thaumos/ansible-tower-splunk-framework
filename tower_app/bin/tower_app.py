@@ -10,6 +10,9 @@ import requests
 # Splunk SDK
 from splunklib.modularinput import *
 
+# Croniter for poll in cron
+from croniter import croniter
+
 
 class TowerAppScript(Script):
 
@@ -18,6 +21,7 @@ class TowerAppScript(Script):
         scheme.description = 'Streams events from Ansible Tower'
         scheme.use_external_validation = True
         scheme.use_single_instance = True
+        scheme.streaming_mode = simple
 
         tower_host_argument = Argument('tower_host')
         tower_host_argument.title = 'Tower Host'
@@ -45,14 +49,6 @@ class TowerAppScript(Script):
         password_argument.description = 'Password to access Tower server.'
         password_argument.required_on_create = True
         scheme.add_argument(password_argument)
-
-        streaming_request_argument = Argument('streaming_request')
-        streaming_request_argument.title = 'Streaming Request'
-        streaming_request_argument.data_type = Argument.data_type_boolean
-        streaming_request_argument.description = 'Whether or not this is a HTTP streaming request : true | false'
-        streaming_request_argument.required_on_create = False
-        streaming_request_argument.required_on_edit = False
-        scheme.add_argument(streaming_request_argument)
 
         request_timeout_argument = Argument('request_timeout')
         request_timeout_argument.title = 'Request Timeout'
@@ -82,10 +78,9 @@ class TowerAppScript(Script):
 
     def validate_input(self, validation_definition):
         tower_host = validation_definition.parameters['tower_host']
-        verify_ssl = False#validation_definition.parameters['verify_ssl']
+        verify_ssl = False #validation_definition.parameters['verify_ssl']
         username = validation_definition.parameters['username']
         password = validation_definition.parameters['password']
-        streaming_request = validation_definition.parameters['streaming_request']
         request_timeout = validation_definition.parameters['request_timeout']
         backoff_time = validation_definition.parameters['backoff_time']
         polling_interval = validation_definition.parameters['polling_interval']
@@ -99,10 +94,30 @@ class TowerAppScript(Script):
     def stream_events(self, inputs, ew):
         for input_name, input_item in inputs.inputs.iteritems():
             tower_host = input_item['tower_host']
-            verify_ssl = False#input_item['verify_ssl']
+            verify_ssl = False #input_item['verify_ssl']
             username = input_item['username']
             password = input_item['password']
+
+# let's poll every minute here!
+            request_timeout=int(config.get("request_timeout",30))
+
+            backoff_time=int(config.get("backoff_time",10))
+
+            sequential_stagger_time  = int(config.get("sequential_stagger_time",0))
+
+            polling_interval_string = config.get("polling_interval","60")
+
+            if polling_interval_string.isdigit():
+                polling_type = 'interval'
+                polling_interval=int(polling_interval_string)
+            else:
+                polling_type = 'cron'
+                cron_start_date = datetime.now()
+                cron_iter = croniter(polling_interval_string, cron_start_date)
+
+
             job_events_url = urlparse.urlunsplit(['https', tower_host, '/api/v1/job_events/', '', ''])
+
             response = requests.get(job_events_url, auth=(username, password), verify=bool(verify_ssl))
             response.raise_for_status()
             data = response.json()
