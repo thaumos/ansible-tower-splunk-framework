@@ -55,7 +55,7 @@ class TowerAppScript(Script):
         request_timeout_argument.data_type = Argument.data_type_number
         request_timeout_argument.description = 'Request Timeout in seconds'
         request_timeout_argument.required_on_edit = False
-        request_timeout_argument.required_on_create False
+        request_timeout_argument.required_on_create = False
         scheme.add_argument(request_timeout_argument)
 
         backoff_time_argument = Argument('backoff_time')
