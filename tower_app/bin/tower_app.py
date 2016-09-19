@@ -51,6 +51,7 @@ class TowerAppScript(Script):
 
         request_timeout_argument = Argument('request_timeout')
         request_timeout_argument.title = 'Request Timeout'
+        request_timeout_argument.data_type = Argument.data_type_number
         request_timeout_argument.description = 'Request Timeout in seconds'
         request_timeout_argument.required_on_edit = False
         request_timeout_argument.required_on_create = False
@@ -58,7 +59,7 @@ class TowerAppScript(Script):
 
         backoff_time_argument = Argument('backoff_time')
         backoff_time_argument.title = 'Backoff Time'
-#        backoff_time_argument.data_type = Argument.data_type_number
+        backoff_time_argument.data_type = Argument.data_type_number
         backoff_time_argument.description = 'Time in seconds to wait for retry after error or timeout'
         backoff_time_argument.required_on_edit = False
         backoff_time_argument.required_on_create = False
@@ -66,7 +67,7 @@ class TowerAppScript(Script):
 
         polling_interval_argument = Argument('polling_interval')
         polling_interval_argument.title = 'Polling Interval'
-#        polling_interval_argument.data_type = Argument.data_type_number
+        polling_interval_argument.data_type = Argument.data_type_number
         polling_interval_argument.description = 'Interval time in seconds to poll the endpoint'
         polling_interval_argument.required_on_edit = False
         polling_interval_argument.required_on_create = False
@@ -111,7 +112,6 @@ class TowerAppScript(Script):
                 cron_start_date = datetime.now()
                 cron_iter = croniter(polling_interval, cron_start_date)
 
-
             job_events_url = urlparse.urlunsplit(['https', tower_host, '/api/v1/job_events/', '', ''])
 
             response = requests.get(job_events_url, auth=(username, password), verify=bool(verify_ssl))
@@ -122,6 +122,8 @@ class TowerAppScript(Script):
                 event.stanza = input_name
                 event.data = json.dumps(result)
                 ew.write_event(event)
+            if polling_type == 'interval':
+                time.sleep(float(polling_interval))
 
 
 if __name__ == '__main__':
