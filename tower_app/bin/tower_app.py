@@ -71,7 +71,7 @@ class TowerAppScript(Script):
         polling_interval_argument.data_type = Argument.data_type_number
         polling_interval_argument.description = 'Interval time in seconds to poll the endpoint'
         polling_interval_argument.required_on_edit = False
-        polling_interval_argument.required_on_create False
+        polling_interval_argument.required_on_create = False
         scheme.add_argument(polling_interval_argument)
 
         return scheme
