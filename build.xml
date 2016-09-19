@@ -1,0 +1,67 @@
+<project name="Ansible Tower Splunk Framework" default="build" basedir="." xmlns:if="ant:if" xmlns:unless="ant:unless">
+
+    <property name="dist" location="dist"/>
+    <property name="build" location="build"/>
+
+    <macrodef name="spl">
+      <attribute name="src"/>
+      <attribute name="dest"/>
+      <attribute name="build" default="${build}"/>
+      <attribute name="suffix" default="spl"/>
+      <attribute name="deps" default=""/>
+      <sequential>
+        <local name="spl-name"/>
+        <basename property="spl-name" file="@{src}"/>
+        <loadproperties srcFile="@{src}/default/app.conf"/>
+        <echo message="Building ${spl-name} version ${version}." level="info"/>
+        <tempfile property="spl-temp" destDir="@{build}" prefix="${spl-name}_"/>
+        <mkdir dir="${spl-temp}"/>
+        <copy todir="${spl-temp}/metadata" failonerror="false">
+          <fileset dir="@{src}/metadata"/>
+        </copy>
+        <copy todir="${spl-temp}/bin">
+          <fileset dir="@{src}/bin"/>
+        </copy>
+        <copy todir="${spl-temp}/appserver" failonerror="false">
+          <fileset dir="@{src}/appserver"/>
+        </copy>
+        <copy todir="${spl-temp}/default">
+          <fileset dir="@{src}/default"/>
+        </copy>
+        <copy todir="${spl-temp}/README">
+          <fileset dir="@{src}/README"/>
+        </copy>
+        <copy todir="${spl-temp}/static" failonerror="false">
+          <fileset dir="@{src}/static"/>
+        </copy>
+        <exec executable="pip" failonerror="true" unless:blank="@{deps}">
+          <arg value="install"/>
+          <arg value="--target"/>
+          <arg value="${spl-temp}/bin"/>
+          <arg line="@{deps}"/>
+        </exec>
+        <tar compression="gzip" destfile="@{dest}/${spl-name}-${version}.@{suffix}">
+          <zipfileset dir="${spl-temp}" prefix="${spl-name}">
+            <exclude name="**/*.pyc"/>
+          </zipfileset>
+        </tar>
+        <delete dir="${spl-temp}"/>
+      </sequential>
+    </macrodef>
+
+    <target name="init">
+      <tstamp/>
+      <mkdir dir="${dist}"/>
+      <mkdir dir="${build}"/>
+    </target>
+
+    <target name="build" depends="init">
+      <spl src="tower_app" dest="${dist}" deps="splunk-sdk requests"/>
+    </target>
+
+    <target name="clean">
+      <!-- <delete dir="${dist}"/> -->
+      <delete dir="${build}"/>
+    </target>
+
+  </project>
