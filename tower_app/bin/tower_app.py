@@ -97,21 +97,19 @@ class TowerAppScript(Script):
             password = input_item['password']
 
 ## let's poll every minute here!
-            request_timeout=int('30')
+            request_timeout = input_item['request_timeout']
 
-            backoff_time=int('10')
+            backoff_time = input_item['backoff_time']
 
-            sequential_stagger_time  = int('0')
+            polling_interval = input_item['polling_interval']
 
-            polling_interval_string = ("60")
-
-            if polling_interval_string.isdigit():
+            if polling_interval.isdigit():
                 polling_type = 'interval'
-                polling_interval=int(polling_interval_string)
+                polling_interval=int(polling_interval)
             else:
                 polling_type = 'cron'
                 cron_start_date = datetime.now()
-                cron_iter = croniter(polling_interval_string, cron_start_date)
+                cron_iter = croniter(polling_interval, cron_start_date)
 
 
             job_events_url = urlparse.urlunsplit(['https', tower_host, '/api/v1/job_events/', '', ''])
