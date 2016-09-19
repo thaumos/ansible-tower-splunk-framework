@@ -21,7 +21,6 @@ class TowerAppScript(Script):
         scheme.description = 'Streams events from Ansible Tower'
         scheme.use_external_validation = True
         scheme.use_single_instance = True
-        scheme.streaming_mode = simple
 
         tower_host_argument = Argument('tower_host')
         tower_host_argument.title = 'Tower Host'
@@ -52,7 +51,6 @@ class TowerAppScript(Script):
 
         request_timeout_argument = Argument('request_timeout')
         request_timeout_argument.title = 'Request Timeout'
-        request_timeout_argument.data_type = Argument.data_type_number
         request_timeout_argument.description = 'Request Timeout in seconds'
         request_timeout_argument.required_on_edit = False
         request_timeout_argument.required_on_create = False
@@ -60,7 +58,7 @@ class TowerAppScript(Script):
 
         backoff_time_argument = Argument('backoff_time')
         backoff_time_argument.title = 'Backoff Time'
-        backoff_time_argument.data_type = Argument.data_type_number
+#        backoff_time_argument.data_type = Argument.data_type_number
         backoff_time_argument.description = 'Time in seconds to wait for retry after error or timeout'
         backoff_time_argument.required_on_edit = False
         backoff_time_argument.required_on_create = False
@@ -68,7 +66,7 @@ class TowerAppScript(Script):
 
         polling_interval_argument = Argument('polling_interval')
         polling_interval_argument.title = 'Polling Interval'
-        polling_interval_argument.data_type = Argument.data_type_number
+#        polling_interval_argument.data_type = Argument.data_type_number
         polling_interval_argument.description = 'Interval time in seconds to poll the endpoint'
         polling_interval_argument.required_on_edit = False
         polling_interval_argument.required_on_create = False
@@ -98,14 +96,14 @@ class TowerAppScript(Script):
             username = input_item['username']
             password = input_item['password']
 
-# let's poll every minute here!
-            request_timeout=int(config.get("request_timeout",30))
+## let's poll every minute here!
+            request_timeout=int('30')
 
-            backoff_time=int(config.get("backoff_time",10))
+            backoff_time=int('10')
 
-            sequential_stagger_time  = int(config.get("sequential_stagger_time",0))
+            sequential_stagger_time  = int('0')
 
-            polling_interval_string = config.get("polling_interval","60")
+            polling_interval_string = ("60")
 
             if polling_interval_string.isdigit():
                 polling_type = 'interval'
