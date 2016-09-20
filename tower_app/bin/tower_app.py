@@ -168,17 +168,17 @@ class TowerAppScript(Script):
                 event = Event()
                 event.stanza = input_name
                 event.data = json.dumps(result)
-                if 'created' in result:
-                    created = result['created']
+                if 'created' in result or 'timestamp' in result:
+                    ts = result.get('created', '') or result.get('timestamp', '')
                     try:
-                        dt = datetime.datetime.strptime(created.split('.')[0], '%Y-%m-%dT%H:%M:%S')
-                        if '.' in created:
-                            ms = int(created.split('.')[1][:3])
+                        dt = datetime.datetime.strptime(ts.split('.')[0], '%Y-%m-%dT%H:%M:%S')
+                        if '.' in ts:
+                            ms = int(ts.split('.')[1][:3])
                             dt = dt.replace(microsecond=ms * 1000)
                         event.time = '{:.3f}'.format(calendar.timegm(dt.timetuple()))
                     except (ValueError, TypeError) as e:
                         if log_level in {'DEBUG'}:
-                            ew.log(ew.DEBUG, '[{}] Error parsing created timestamp {}: {}'.format(input_name, created, e))
+                            ew.log(ew.DEBUG, '[{}] Error parsing created timestamp {}: {}'.format(input_name, ts, e))
                 ew.write_event(event)
                 last_id = max(last_id, result.get('id', 0))
             input_state[last_id_key] = last_id
