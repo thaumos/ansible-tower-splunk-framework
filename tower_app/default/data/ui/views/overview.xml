@@ -73,7 +73,7 @@
       <chart>
         <title>Top Tasks : Last 15 Mins</title>
         <search>
-          <query>index="ansible_tower" sourcetype="ansible:job_event"| top limit=20 "event_data.task"</query>
+          <query>index="ansible_tower" sourcetype="ansible:job_event"| top limit=10 "event_data.task"</query>
           <earliest>-15m</earliest>
           <latest>now</latest>
         </search>
