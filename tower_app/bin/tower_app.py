@@ -120,7 +120,10 @@ class TowerAppScript(Script):
         if event_type not in {'job_events', 'activity_stream'}:
             raise ValueError('Unsupported event type: {}'.format(event_type))
         extra_query_params = validation_definition.parameters.get('extra_query_params', '')
-        # FIXME: Validate!
+        try:
+            urlparse.parse_qs(extra_query_params, True, True)
+        except ValueError as e:
+            raise ValueError('Unable to parse extra query params: {}'.format(e))
         log_level = validation_definition.parameters.get('log_level', 'WARNING')
         if log_level.upper() not in {'DEBUG', 'INFO', 'WARNING', 'ERROR'}:
             raise ValueError('Invalid log level: {}'.format(log_level))
@@ -138,13 +141,14 @@ class TowerAppScript(Script):
         tower_host = input_params['tower_host']
         event_type = input_params.get('event_type', 'job_events')
         extra_query_params = input_params.get('extra_query_params', '')
+        qs_dict = urlparse.parse_qs(extra_query_params, True)
         log_level = input_params.get('log_level', 'WARNING')
         last_id_key = '{}_last_id'.format(event_type)
         last_id = input_state.get(last_id_key, 0)
 
         while True:
-            qs = urllib.urlencode(dict(order_by='id', id__gt=last_id))
-            # FIXME: Include extra_query_params
+            qs_dict.update(dict(order_by='id', id__gt=last_id))
+            qs = urllib.urlencode(qs_dict)
             url = urlparse.urlunsplit(['https', tower_host, '/api/v1/{}/'.format(event_type), qs, ''])
             response = session.get(url)
             if log_level.upper() in {'DEBUG'}:
