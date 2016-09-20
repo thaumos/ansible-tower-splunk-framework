@@ -118,14 +118,15 @@ class TowerAppScript(Script):
         return session
 
     def validate_input(self, validation_definition):
-        event_type = validation_definition.parameters.get('event_type', None) or 'job_events'
-        if event_type not in {'job_events', 'activity_stream'}:
+        event_type = validation_definition.parameters.get('event_type', None) or 'job_event'
+        if event_type not in {'job_event', 'activity_stream'}:
             raise ValueError('Unsupported event type: {}'.format(event_type))
         extra_query_params = validation_definition.parameters.get('extra_query_params', None) or ''
-        try:
-            urlparse.parse_qs(extra_query_params, True, True)
-        except ValueError as e:
-            raise ValueError('Unable to parse extra query params: {}'.format(e))
+        if extra_query_params.strip():
+            try:
+                urlparse.parse_qs(extra_query_params.strip(), True, True)
+            except ValueError as e:
+                raise ValueError('Unable to parse extra query params: {}'.format(e))
         log_level = validation_definition.parameters.get('log_level', None) or 'WARNING'
         if log_level.upper() not in {'DEBUG', 'INFO', 'WARNING', 'ERROR'}:
             raise ValueError('Invalid log level: {}'.format(log_level))
@@ -141,9 +142,9 @@ class TowerAppScript(Script):
     def stream_tower_events(self, input_name, input_params, input_state, ew):
         session = self._get_session(input_params)
         tower_host = input_params['tower_host']
-        event_type = input_params.get('event_type', 'job_events')
-        extra_query_params = input_params.get('extra_query_params', '')
-        qs_dict = urlparse.parse_qs(extra_query_params, True)
+        event_type = input_params.get('event_type', None) or 'job_event'
+        extra_query_params = input_params.get('extra_query_params', None) or ''
+        qs_dict = urlparse.parse_qs(extra_query_params.strip(), True)
         log_level = input_params.get('log_level', 'WARNING').upper()
         last_id_key = '{}_last_id'.format(event_type)
         last_id = input_state.get(last_id_key, 0)
@@ -151,7 +152,7 @@ class TowerAppScript(Script):
         while True:
             qs_dict.update(dict(order_by='id', id__gt=last_id))
             qs = urllib.urlencode(qs_dict)
-            url = urlparse.urlunsplit(['https', tower_host, '/api/v1/{}/'.format(event_type), qs, ''])
+            url = urlparse.urlunsplit(['https', tower_host, '/api/v1/{}s/'.format(event_type), qs, ''])
             response = session.get(url)
             if log_level in {'DEBUG'}:
                 ew.log(ew.DEBUG, '[{}] GET {} -> {}'.format(input_name, url, response.status_code))
