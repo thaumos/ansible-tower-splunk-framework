@@ -6,3 +6,4 @@ password=<value>
 event_type=<value>
 extra_query_params=<value>
 log_level=<value>
+index=ansible_tower
