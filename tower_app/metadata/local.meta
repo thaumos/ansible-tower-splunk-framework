@@ -1,0 +1,42 @@
+[app/ui]
+version = 6.4.0
+modtime = 1461210947.340652000
+
+[app/launcher]
+version = 6.4.0
+modtime = 1461210947.343104000
+
+[app/package/check_for_updates]
+version = 6.4.0
+modtime = 1461210947.343959000
+
+[app/install/install_source_checksum]
+version = 6.4.0
+modtime = 1464060956.570855000
+
+[views/overview]
+access = read : [ * ], write : [ * ]
+export = none
+owner = admin
+version = 6.4.0
+modtime = 1474331532.488836000
+
+[indexes/tower]
+owner = admin
+version = 6.4.0
+modtime = 1474337981.347510000
+
+[inputs/tower_app%3A%2F%2Fjob%20events]
+owner = admin
+version = 6.4.0
+modtime = 1474339748.661677000
+
+[inputs/tower_app%3A%2F%2Factivity%20streams]
+owner = admin
+version = 6.4.0
+modtime = 1474339752.699999000
+
+[props/tower_activity_stream]
+owner = admin
+version = 6.4.0
+modtime = 1474341020.945584000
