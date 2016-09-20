@@ -38,7 +38,7 @@
       <title>Top Event Hosts</title>
       <chart>
         <search>
-          <query>index="ansible_tower" sourcetype="ansible:job_event"| top limit=20 "results{}.event_data.host"</query>
+          <query>index="ansible_tower" sourcetype="ansible:job_event"| top limit=20 "event_data.host"</query>
           <earliest>-15m</earliest>
           <latest>now</latest>
         </search>
