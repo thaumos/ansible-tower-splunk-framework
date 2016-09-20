@@ -143,6 +143,10 @@ class TowerAppScript(Script):
         session = self._get_session(input_params)
         tower_host = input_params['tower_host']
         event_type = input_params.get('event_type', None) or 'job_event'
+        if event_type == 'job_event':
+            path = '/api/v1/{}s/'.format(event_type)
+        else:
+            path = '/api/v1/{}/'.format(event_type)
         extra_query_params = input_params.get('extra_query_params', None) or ''
         qs_dict = urlparse.parse_qs(extra_query_params.strip(), True)
         log_level = input_params.get('log_level', 'WARNING').upper()
@@ -152,7 +156,7 @@ class TowerAppScript(Script):
         while True:
             qs_dict.update(dict(order_by='id', id__gt=last_id))
             qs = urllib.urlencode(qs_dict)
-            url = urlparse.urlunsplit(['https', tower_host, '/api/v1/{}s/'.format(event_type), qs, ''])
+            url = urlparse.urlunsplit(['https', tower_host, path, qs, ''])
             response = session.get(url)
             if log_level in {'DEBUG'}:
                 ew.log(ew.DEBUG, '[{}] GET {} -> {}'.format(input_name, url, response.status_code))
