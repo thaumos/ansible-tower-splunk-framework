@@ -2,7 +2,9 @@
 
 # Python
 import base64
+import calendar
 import collections
+import datetime
 import json
 import os
 import urllib
@@ -116,15 +118,15 @@ class TowerAppScript(Script):
         return session
 
     def validate_input(self, validation_definition):
-        event_type = validation_definition.parameters.get('event_type', '')
+        event_type = validation_definition.parameters.get('event_type', None) or 'job_events'
         if event_type not in {'job_events', 'activity_stream'}:
             raise ValueError('Unsupported event type: {}'.format(event_type))
-        extra_query_params = validation_definition.parameters.get('extra_query_params', '')
+        extra_query_params = validation_definition.parameters.get('extra_query_params', None) or ''
         try:
             urlparse.parse_qs(extra_query_params, True, True)
         except ValueError as e:
             raise ValueError('Unable to parse extra query params: {}'.format(e))
-        log_level = validation_definition.parameters.get('log_level', 'WARNING')
+        log_level = validation_definition.parameters.get('log_level', None) or 'WARNING'
         if log_level.upper() not in {'DEBUG', 'INFO', 'WARNING', 'ERROR'}:
             raise ValueError('Invalid log level: {}'.format(log_level))
         session = self._get_session(validation_definition.parameters)
@@ -161,6 +163,17 @@ class TowerAppScript(Script):
                 event = Event()
                 event.stanza = input_name
                 event.data = json.dumps(result)
+                if 'created' in result:
+                    created = result['created']
+                    try:
+                        dt = datetime.datetime.strptime('%Y-%m-%dT%H:%M:%S', created.split('.')[0])
+                        if '.' in created:
+                            ms = int(created.split('.')[1][:3])
+                            dt = dt.replace(microsecond=ms * 1000)
+                        event.time = '{:.3f}'.format(calendar.timegm(dt.timetuple()))
+                    except (ValueError, TypeError) as e:
+                        if log_level in {'DEBUG'}:
+                            ew.log(ew.DEBUG, '[{}] Error parsing created timestamp {}: {}'.format(input_name, created, e))
                 ew.write_event(event)
                 last_id = max(last_id, result.get('id', 0))
             input_state[last_id_key] = last_id
