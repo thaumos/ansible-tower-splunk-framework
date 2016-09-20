@@ -167,7 +167,7 @@ class TowerAppScript(Script):
                 if 'created' in result:
                     created = result['created']
                     try:
-                        dt = datetime.datetime.strptime('%Y-%m-%dT%H:%M:%S', created.split('.')[0])
+                        dt = datetime.datetime.strptime(created.split('.')[0], '%Y-%m-%dT%H:%M:%S')
                         if '.' in created:
                             ms = int(created.split('.')[1][:3])
                             dt = dt.replace(microsecond=ms * 1000)

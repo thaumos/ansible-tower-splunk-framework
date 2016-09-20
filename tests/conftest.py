@@ -45,7 +45,7 @@ def input_stream(tower_cli_config, tmpdir):
         'verify_ssl': 1 if config['verify_ssl'].lower() in ('true', '1') else 0,
         'username': config['username'],
         'password': config['password'],
-        'event_type': 'job_events',
+        'event_type': 'job_event',
         'log_level': 'debug',
     }
     # Note: Doesn't escape anything that might screw up the XML.
