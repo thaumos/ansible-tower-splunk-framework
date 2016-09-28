@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 # Python
+import sys
 import base64
 import calendar
 import collections
@@ -9,6 +10,15 @@ import json
 import os
 import urllib
 import urlparse
+
+SPLUNK_HOME = os.environ.get("SPLUNK_HOME")
+
+#dynamically load in any eggs in /etc/apps/snmp_ta/bin
+EGG_DIR = SPLUNK_HOME + "/etc/apps/tower_app/bin/"
+
+for filename in os.listdir(EGG_DIR):
+    if filename.endswith(".egg"):
+        sys.path.append(EGG_DIR + filename)
 
 # Requests
 import requests
@@ -38,13 +48,13 @@ class InputState(collections.MutableMapping):
 
     def __iter__(self):
         return iter(self._load())
-    
+
     def __len__(self):
         return len(self._load())
 
     def __getitem__(self, key):
         return self._load()[key]
-    
+
     def __setitem__(self, key, value):
         data = self._load()
         data[key] = value
